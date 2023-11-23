@@ -1,6 +1,4 @@
-import { getWeather } from "./weatherObject";
+import { buildDisplay } from "./weatherDisplay";
 
-const weather = await getWeather();
-
-console.log(weather);
-
+const test = JSON.parse(localStorage.getItem("Boise"));
+buildDisplay(test);
