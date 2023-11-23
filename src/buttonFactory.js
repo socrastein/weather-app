@@ -8,11 +8,12 @@ import searchIcon from "./icons/search.svg";
 const icons = {
   arrow: arrowIcon,
   more: moreIcon,
-  search: searchIcon
+  search: searchIcon,
 };
 
-export const newIconButton = (icon) => {
+export const newIconButton = (icon, id = "") => {
   let button = document.createElement("button");
+  button.id = id;
   button.style.backgroundImage = `url(${icons[icon]})`;
   button.name = icon;
   button.classList.add("button", `${icon}Button`);
@@ -23,12 +24,12 @@ export const newIconButton = (icon) => {
     button.name = newIcon;
     button.classList.add("button", `${button.name}Button`);
   };
-
   return button;
 };
 
-export const newTextButton = (text) => {
+export const newTextButton = (text, id = "") => {
   let button = document.createElement("button");
+  button.id = id;
   button.textContent = text;
   button.classList.add("button", "textButton");
 
