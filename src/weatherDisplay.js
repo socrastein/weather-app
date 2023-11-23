@@ -8,7 +8,7 @@ import thunderGIF from "./gifs/thunderstorm.gif";
 import lightGIF from "./gifs/cloudsLight.gif";
 import heavyGIF from "./gifs/cloudsHeavy.gif";
 
-import { getWeather, weather } from "./weatherObject";
+import { getWeather} from "./weatherObject";
 import { newIconButton } from "./buttonFactory";
 
 const mainContainer = document.getElementById("mainContainer");
@@ -61,7 +61,10 @@ const tempConversion = (temp) => {
   }
 };
 
-export const buildDisplay = (weatherObject) => {
+export const buildDisplay = async (weatherObject) => {
+  if (!weatherObject) {
+    weatherObject = await getWeather();
+  }
   //Clear current display
   mainContainer.innerHTML = "";
 
