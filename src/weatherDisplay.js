@@ -1,5 +1,13 @@
 import "./weatherDisplay.css";
 
+import rainGIF from "./gifs/rain.gif";
+import sunnyGIF from "./gifs/sunny.gif";
+import snowGIF from "./gifs/snow.gif";
+import hazeGIF from "./gifs/haze.gif";
+import thunderGIF from "./gifs/thunderstorm.gif";
+import lightGIF from "./gifs/cloudsLight.gif";
+import heavyGIF from "./gifs/cloudsHeavy.gif";
+
 import { getWeather, weather } from "./weatherObject";
 import { newIconButton } from "./buttonFactory";
 
@@ -21,6 +29,15 @@ const weatherEmojis = {
   ],
 };
 
+const weatherGifs = {
+  Clear: sunnyGIF,
+  Thunderstorm: thunderGIF,
+  Drizzle: rainGIF,
+  Rain: rainGIF,
+  Snow: snowGIF,
+  Clouds: [lightGIF, heavyGIF],
+};
+
 const make = (type, id = "") => {
   const element = document.createElement(type);
   element.id = id;
@@ -31,7 +48,18 @@ const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-let degrees = "F";
+const tempConversion = (temp) => {
+  temp = parseInt(temp);
+  //Convert to celsius
+  if (degrees === "F") {
+    degrees = "C";
+    return ((temp - 32) * 5) / 9;
+    //Convert to fahrenheit
+  } else {
+    degrees = "F";
+    return (temp * 9) / 5 + 32;
+  }
+};
 
 export const buildDisplay = (weatherObject) => {
   //Clear current display
@@ -42,7 +70,7 @@ export const buildDisplay = (weatherObject) => {
   mainContainer.append(headerContainer);
 
   const appTitle = make("h1", "appTitle");
-  appTitle.textContent = "Weather App";
+  appTitle.textContent = "🌤 Weather App ⛈";
 
   headerContainer.append(appTitle);
 
@@ -84,8 +112,8 @@ export const buildDisplay = (weatherObject) => {
 
   const tempMin = make("p", "tempMin");
   const tempMax = make("p", "tempMax");
-  tempContainer.append(tempMin);
-  tempContainer.append(tempMax);
+  tempRangeContainer.append(tempMin);
+  tempRangeContainer.append(tempMax);
 
   //Display current weather
   const weatherContainer = make("div", "weatherContainer");
@@ -124,9 +152,33 @@ export const buildDisplay = (weatherObject) => {
       currentCity.textContent = "😭 City not found...";
     } else {
       currentCity.textContent = weatherObject.name;
-      temperature.textContent = `🌡️ ${weatherObject.main.temp}° ${degrees}`;
-      tempMin.textContent = `Min ${weatherObject.main.temp_min}°`;
-      tempMax.textContent = `Max ${weatherObject.main.temp_max}°`;
+      let degrees = "F";
+
+      let tempF = Math.round(weatherObject.main.temp * 10) / 10;
+      let tempC = Math.round((((tempF - 32) * 5) / 9) * 10) / 10;
+      let minF = Math.round(weatherObject.main.temp_min * 10) / 10;
+      let minC = Math.round((((minF - 32) * 5) / 9) * 10) / 10;
+      let maxF = Math.round(weatherObject.main.temp_max * 10) / 10;
+      let maxC = Math.round((((maxF - 32) * 5) / 9) * 10) / 10;
+
+      temperature.textContent = `🌡️ ${tempF}°${degrees}`;
+      tempMin.textContent = `Min ${minF}°`;
+      tempMax.textContent = `Max ${maxF}°`;
+
+      tempContainer.onclick = () => {
+        if (degrees === "F") {
+          degrees = "C";
+          temperature.textContent = `🌡️ ${tempC}°${degrees}`;
+          tempMin.textContent = `Min ${minC}°`;
+          tempMax.textContent = `Max ${maxC}°`;
+        } else {
+          degrees = "F";
+          temperature.textContent = `🌡️ ${tempF}°${degrees}`;
+          tempMin.textContent = `Min ${minF}°`;
+          tempMax.textContent = `Max ${maxF}°`;
+        }
+      };
+
       weatherMain.textContent = weatherObject.weather[0].main;
       weatherDesc.textContent = capitalize(
         weatherObject.weather[0].description
@@ -134,27 +186,50 @@ export const buildDisplay = (weatherObject) => {
       if (weatherObject.weather[0].main === "Clouds") {
         switch (weatherObject.weather[0].id) {
           case 801:
-            weatherEmoji.textContent = weatherEmojis.Clouds[0]
+            weatherEmoji.textContent = weatherEmojis.Clouds[0];
+            searchContainer.style.backgroundImage = `url(${weatherGifs.Clouds[0]})`;
             break;
           case 802:
-            weatherEmoji.textContent = weatherEmojis.Clouds[1]
+            weatherEmoji.textContent = weatherEmojis.Clouds[1];
+            searchContainer.style.backgroundImage = `url(${weatherGifs.Clouds[0]})`;
             break;
           case 803:
-            weatherEmoji.textContent = weatherEmojis.Clouds[2]
+            weatherEmoji.textContent = weatherEmojis.Clouds[2];
+            searchContainer.style.backgroundImage = `url(${weatherGifs.Clouds[1]})`;
             break;
           case 804:
-            weatherEmoji.textContent = weatherEmojis.Clouds[3]
+            weatherEmoji.textContent = weatherEmojis.Clouds[3];
+            searchContainer.style.backgroundImage = `url(${weatherGifs.Clouds[1]})`;
             break;
 
           default:
             break;
         }
+      } else if (("" + weatherObject.weather[0].id)[0] === "7") {
+        weatherEmoji.textContent = "🌫";
+        searchContainer.style.backgroundImage = `url(${hazeGIF})`;
       } else {
         weatherEmoji.textContent =
           weatherEmojis[`${weatherObject.weather[0].main}`];
+        searchContainer.style.backgroundImage = `url(${
+          weatherGifs[`${weatherObject.weather[0].main}`]
+        })`;
       }
-      windSpeed.textContent = `Wind Speed: ${weatherObject.wind.speed} mph`;
-      humidity.textContent = `Humidity: ${weatherObject.main.humidity}%`;
+      let wind = "MPH";
+      let windMPH = Math.round(weatherObject.wind.speed * 10) / 10;
+      let windKPH = Math.round(windMPH * 1.6 * 10) / 10;
+      windSpeed.textContent = `💨 Wind Speed ${windMPH} mph`;
+      humidity.textContent = `💧 Humidity ${weatherObject.main.humidity}%`;
+
+      airContainer.onclick = () => {
+        if (wind === "MPH") {
+          wind = "KPH";
+          windSpeed.textContent = `💨 Wind Speed ${windKPH} kph`;
+        } else {
+          wind = "MPH";
+          windSpeed.textContent = `💨 Wind Speed ${windMPH} mph`;
+        }
+      };
     }
     currentCity.style.fontSize = "1.5rem";
   } else {
